@@ -6,7 +6,7 @@ put melons in a shopping cart.
 Authors: Joel Burton, Christian Fernandez, Meggie Mahnken, Katie Byers.
 """
 
-from flask import Flask, render_template, redirect, flash
+from flask import Flask, render_template, redirect, flash, session
 import jinja2
 
 import melons
@@ -64,6 +64,7 @@ def add_to_cart(melon_id):
     page and display a confirmation message: 'Melon successfully added to
     cart'."""
 
+
     # TODO: Finish shopping cart functionality
 
     # The logic here should be something like:
@@ -74,9 +75,21 @@ def add_to_cart(melon_id):
     # - increment the count for that melon id by 1
     # - flash a success message
     # - redirect the user to the cart page
+    if "cart" in session:
+        cart = session["cart"]
+    else:
+        cart = session["cart"]= {}
 
-    return "Oops! This needs to be implemented!"
+    if melon_id in cart: 
+        session["cart"][melon_id] += 1 
+        flash('Melon sucessfully added!')
+        session.modified =  True
+    else: 
+        session["cart"][melon_id] = 1
+        flash('Melon sucessfully added!')
+    
 
+    return redirect("/cart")
 
 @app.route("/cart")
 def show_shopping_cart():
@@ -100,7 +113,21 @@ def show_shopping_cart():
     # Make sure your function can also handle the case wherein no cart has
     # been added to the session
 
-    return render_template("cart.html")
+    users_cart = session.get("cart", {})
+    total_cost = 0
+    melon_objects = []
+    
+    for melon_id, quantity in users_cart.items():
+
+        melon = melons.get_by_id(melon_id)
+        melon_objects.append(melon)
+        melon_price = melon.price
+        melon_total = (quantity * melon_price)
+        total_cost = total_cost + melon_total
+
+    return render_template("cart.html", 
+                           melons=melon_objects, 
+                           total_cost=total_cost)
 
 
 @app.route("/login", methods=["GET"])

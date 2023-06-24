@@ -76,6 +76,7 @@ def read_melon_types_from_file(filepath):
                 seedless,
             )
 
+# melon_types is dictionary of melon objects
     return melon_types
 
 
